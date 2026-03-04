@@ -19,6 +19,7 @@ void updateRecord(FILE *fPtr);
 void newRecord(FILE *fPtr);
 void deleteRecord(FILE *fPtr);
 void searchAccount(FILE *fPtr);
+void sortAccounts(FILE *fPtr);
 
 int main(int argc, char *argv[])
 {
@@ -55,7 +56,10 @@ int main(int argc, char *argv[])
             break;
         case 6:
             searchAccount(cfPtr);
-             break;
+            break;
+        case 7:
+            sortAccounts(cfPtr);
+            break;
         // display if user does not select valid choice
         default:
             puts("Incorrect choice");
@@ -228,7 +232,51 @@ void searchAccount(FILE *fPtr)
                client.balance);
     }
 }
+void sortAccounts(FILE *fPtr)
+{
+    struct clientData clients[100];
+    struct clientData temp;
+    int i, j;
+    int count = 0;
 
+    rewind(fPtr);   // Move pointer to beginning of file
+
+    // Read records into array
+    while(fread(&clients[count], sizeof(struct clientData), 1, fPtr) == 1)
+    {
+        if(clients[count].acctNum != 0)
+        {
+            count++;
+        }
+    }
+
+    // Bubble Sort by balance (Ascending)
+    for(i = 0; i < count - 1; i++)
+    {
+        for(j = 0; j < count - i - 1; j++)
+        {
+            if(clients[j].balance > clients[j + 1].balance)
+            {
+                temp = clients[j];
+                clients[j] = clients[j + 1];
+                clients[j + 1] = temp;
+            }
+        }
+    }
+
+    printf("\nAccounts Sorted by Balance:\n");
+    printf("%-6s%-16s%-11s%10s\n", "Acct", "Last Name", "First Name", "Balance");
+
+    // Display sorted records
+    for(i = 0; i < count; i++)
+    {
+        printf("%-6d%-16s%-11s%10.2f\n",
+               clients[i].acctNum,
+               clients[i].lastName,
+               clients[i].firstName,
+               clients[i].balance);
+    }
+}
 // enable user to input menu choice
 unsigned int enterChoice(void)
 {
@@ -240,7 +288,8 @@ unsigned int enterChoice(void)
                  "2 - update an account\n"
                  "3 - add a new account\n"
                  "4 - delete an account\n"
-                 "6 - search an account\n"      // <-- ADD THIS LINE
+                 "6 - search an account\n"      
+                 "7 - sort accounts by balance\n"
                  "5 - end program\n? ");
 
     scanf("%u", &menuChoice); // receive choice from user
